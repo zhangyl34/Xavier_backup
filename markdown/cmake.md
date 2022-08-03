@@ -5,6 +5,7 @@
 - [CMake 笔记](#cmake-笔记)
   - [lib 文件编译](#lib-文件编译)
   - [调用链接库](#调用链接库)
+  - [lib 与 src 同时编译](#lib-与-src-同时编译)
 
 <!-- /code_chunk_output -->
 
@@ -94,7 +95,36 @@ __最终运行得到：__
 /home/neal/project/helloworld/build/bin/hello
 ```
 
+## lib 与 src 同时编译
 
+__主目录下：__
 
+```cmake {.line-numbers}
+CMAKE_MINIMUM_REQUIRED(VERSION 3.16)
 
+PROJECT(HELLOLIB)
+ADD_SUBDIRECTORY(lib)
+ADD_SUBDIRECTORY(src bin)
+```
 
+__lib 目录下：__
+
+```cmake {.line-numbers}
+SET(LIBHELLO_SRC hello.cpp)
+ADD_LIBRARY(hello_lib SHARED ${LIBHELLO_SRC})
+SET_TARGET_PROPERTIES(hello_lib PROPERTIES VERSION 1.2 SOVERSION 1)
+```
+
+__src 目录下：__
+
+```cmake {.line-numbers}
+ADD_EXECUTABLE(hello helloworld.cpp)
+
+FIND_PATH(HELLO_HEADER NAMES hello.h PATHS /home/neal/projects/helloworld/lib)
+INCLUDE_DIRECTORIES(${HELLO_HEADER})
+TARGET_LINK_LIBRARIES(hello hello_lib)
+
+FIND_PACKAGE(OpenCV REQUIRED)
+INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS})
+TARGET_LINK_LIBRARIES(hello ${OpenCV_LIBS})
+```
