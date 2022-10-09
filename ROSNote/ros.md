@@ -391,7 +391,7 @@ Here we'll create the service ("add_two_ints_server") node which will receive tw
 
 ```c++{.line-numbers}
 #include "ros/ros.h"
-#include "beginner_tutorials/AddTwoInts.h"  // 自动生成自先前创建的srv文件
+#include "beginner_tutorials/AddTwoInts.h"  // 自动生成自先前创建的 srv 文件
 
 bool add(beginner_tutorials::AddTwoInts::Request &req,
     beginner_tutorials::AddTwoInts::Response &res)
@@ -409,8 +409,8 @@ int main(int argc, char **argv)
     
     ros::ServiceServer service = n.advertiseService("add_two_ints", add);
     ROS_INFO("Ready to add two ints.");
-    ros::spin();
     
+    ros::spin();
     return 0;
 }
 ```
@@ -432,9 +432,11 @@ int main(int argc, char **argv)
         ROS_INFO("usage: add_two_ints_client X Y");
         return 1;
     }
-    
     ros::NodeHandle n;
-    ros::ServiceClient client = n.serviceClient<beginner_tutorials::AddTwoInts>("add_two_ints");
+
+    ros::ServiceClient client = 
+        n.serviceClient<beginner_tutorials::AddTwoInts>("add_two_ints");
+    
     beginner_tutorials::AddTwoInts srv;
     srv.request.a = atoll(argv[1]);
     srv.request.b = atoll(argv[2]);
@@ -447,18 +449,17 @@ int main(int argc, char **argv)
         ROS_ERROR("Failed to call service add_two_ints");
         return 1;
     }
-    
     return 0;
 }
 ```
 
 ---
 
-modify the CMakeLists.txt. And finally run: catkin_make.
+modify the CMakeLists.txt. And finally run: `catkin_make`.
 
 ## 17. Recording and Playing back data
 
-```
+```shell
 $ rosbag record -a
 $ rosbag info <your_bagfile>
 $ rosbag play -r 2 <your_bagfile>
