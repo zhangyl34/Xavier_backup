@@ -91,6 +91,8 @@ FIND_LIBRARY(HELLO_LIBRARY hello HINTS /home/neal/usr/lib)  # 查找链接库
 TARGET_LINK_LIBRARIES(hello ${HELLO_LIBRARY})  # 添加链接库
 ```
 
+include_directories(header-dir) 是一个全局包含，向下传递。就是说如果某个目录的 CMakeLists.txt 中使用了该指令，其下所有的子目录默认也包含了 header-dir 目录。__建议使用 target_include_directories()。__
+
 __最终运行得到：__
 
 ```shell

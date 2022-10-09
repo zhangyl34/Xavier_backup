@@ -248,24 +248,17 @@ rosparam allows you to store and manipulate data on the ROS Parameter Server.
 
 __rqt_console attaches to ROS's logging framework to display output from nodes.__ rqt_logger_level allows us to change the verbosity level (DEBUG, INFO, WARN, ERROR) of nodes as they run. __They are used for debugging.__
 
-```shell
-$ rosrun rqt_console rqt_console
-$ rosrun rqt_logger_level rqt_logger_level
-```
-
 ---
 
 __roslaunch is used for starting many nodes at once.__ roslaunch command automatically looks into the passed package and detects available launch files.
 
-```shell
-$ roslaunch [package] [filename.launch]
-```
+创建 package_1/launch/turtlemimic.launch 文件。
 
 ```xml{.line-numbers}
 <launch>  # launch tag to identify the file as a launch file
 
     <group ns="turtlesim1">  # namespace to avoid name conflicts
-        <node pkg="turtlesim" name="sim" type="turtlesim_node"/>
+        <node pkg="turtlesim" name="sim" type="turtlesim_node"/>  # type 是可执行文件名称。
     </group>
 
     <group ns="turtlesim2">
@@ -278,6 +271,11 @@ $ roslaunch [package] [filename.launch]
     </node>
 
 </launch>
+```
+
+```shell
+# roslaunch [package] [filename.launch]
+$ roslaunch package_1 turtlemimic.launch
 ```
 
 ## 9. Using rosed to edit files in ROS
@@ -405,7 +403,7 @@ int main(int argc, char **argv)
     
     // subscribe 告诉 ROS 想要订阅 topic "chatter"，message 会被传入回调函数。
     // 这里的参数 1000 specifies how many messages to buffer up before throwing some away.
-    // Subscriber object (sub) must be held on to，当它全部被销毁后，自动unsubscribed。
+    // Subscriber object (sub) must be held on to，当它全部被销毁后，自动 unsubscribed。
     ros::Subscriber sub = n.subscribe("chatter", 1000, chatterCallback);
     
     ros::spin();  // spin，等待 message 传入。
