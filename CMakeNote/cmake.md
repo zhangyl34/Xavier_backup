@@ -2,7 +2,7 @@
 
 <!-- code_chunk_output -->
 
-- [CMake 笔记](#cmake-笔记)
+- [《CMake 实践》](#cmake-实践)
   - [lib 文件编译](#lib-文件编译)
   - [调用链接库](#调用链接库)
   - [lib 与 src 同时编译](#lib-与-src-同时编译)
@@ -11,9 +11,11 @@
 
 
 
-# CMake 笔记
+# 《CMake 实践》
 
-___
+CMakeLists.txt 文件会根据目标用户平台进一步生成 Makefile 和工程文件。
+
+CMakeLists.txt 的语法由指令、参数、注释和空格组成，其中指令是大小写无关的，参数是大小写相关的。
 
 ## lib 文件编译
 
@@ -22,16 +24,16 @@ lib 文件夹下有 hello.cpp 与 hello.h 两个文件。将其编译为动态�
 __主目录下：__
 
 ```cmake {.line-numbers}
-CMAKE_MINIMUM_REQUIRED(VERSION 3.16)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.16)  # CMake 最低版本号要求
 
-PROJECT(HELLOLIB)
+PROJECT(HELLOLIB)  # 项目名称
 ADD_SUBDIRECTORY(lib)
 ```
 
 __lib 目录下：__
 
 ```cmake {.line-numbers}
-SET(LIBHELLO_SRC hello.cpp)
+SET(LIBHELLO_SRC hello.cpp)  # 设置变量
 ADD_LIBRARY(hello SHARED ${LIBHELLO_SRC})  # 动态链接库
 SET_TARGET_PROPERTIES(hello PROPERTIES CLEAN_DIRECT_OUTPUT 1)
 SET_TARGET_PROPERTIES(hello PROPERTIES VERSION 1.2 SOVERSION 1)  # 指定动态库版本
@@ -47,7 +49,7 @@ INSTALL(FILES hello.h DESTINATION include/hello)
 
 __命令行输入：__
 
-```
+```shell
 cmake -DCMAKE_INSTALL_PREFIX=/home/neal/usr  ..
 make
 mak install
@@ -55,7 +57,7 @@ mak install
 
 __最终运行得到：__
 
-```
+```shell
 /home/neal/usr/lib/libhello.a
 /home/neal/usr/lib/libhello.so
 /home/neal/usr/lib/libhello.so.1
@@ -91,7 +93,7 @@ TARGET_LINK_LIBRARIES(hello ${HELLO_LIBRARY})  # 添加链接库
 
 __最终运行得到：__
 
-```
+```shell
 /home/neal/project/helloworld/build/bin/hello
 ```
 
