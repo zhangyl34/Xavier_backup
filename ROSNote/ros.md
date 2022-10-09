@@ -29,20 +29,18 @@ http://wiki.ros.org/ROS/Tutorials
 
 ```shell
 $ echo "source /opt/ros/melodic/setup.bash" >> ~./bashrc
-```
-
-这句话的意思是把引号中的指令加到 ~/.bashrc 这个脚本后面。
-如果有多个 ROS 版本建议不要用这个指令。
-
-```shell
 $ source ~./bashrc
 ```
 
 __It allows you to have access to the ROS commands.__
 
+如果有多个 ROS 版本建议不要用这个指令。
+
 ---
 
-create and build a catkin workspace using the command: catkin_make.
+__catkin is the recommended way to organize and build your ROS code.__
+
+create and build a catkin workspace using the command: `catkin_make`.
 
 ```shell
 $ mkdir -p ~/catkin_ws/src
@@ -50,20 +48,19 @@ $ cd ~/catkin_ws/
 $ catkin_make
 ```
 
-catkin_make 之后，当前 workspace 下除了 src 又得到了 build 和 devel 两个文件夹，在 devel 文件夹中又会有几个 setup.*sh 文件。
-If you want to overlay this workspace on top of your environment:
+catkin_make 之后，当前 workspace 下除了 src 又得到了 build 和 devel 两个文件夹，在 src 文件夹下自动生成了 CMakeLists.txt，在 devel 文件夹中又会有几个 setup.*sh 文件。
+
+overlay this workspace on top of your environment:
 
 ```shell
 $ source devel/setup.bash
 ```
 
-__catkin is the recommended way to organize and build your ROS code.__
-
 ## 2. Navigating the ROS Filesystem
 
 Filesystem consists of:
-* Packages: software organization unit. (contain libraries, executables, scripts...)
-* Manifests (package.xml): a description of a package
+* __Packages:__ software organization unit (contain libraries, executables, scripts...).
+* __Manifests (package.xml):__ a description of a package.
 
 ---
 
@@ -71,7 +68,7 @@ Filesystem 的常用工具
 
 ```shell
 $ rospack find [package_name]
-$ roscd [locationname[/dubdir]]
+$ roscd [locationname[/subdir]]
 $ rosls [locationname[/subdir]]
 ```
 
@@ -80,31 +77,33 @@ __ROS tools will only find ROS packages that are within the directories listed i
 ## 3. Creating a ROS Package
 
 __catkin package: package.xml + CMakeLists.txt + its own folder.__
-比如说 FAST_LIO 应该是一个 catkin package。
+比如说 FAST_LIO 就是一个 catkin package。
 
 ---
 
 The recommended method of working with catkin packages is using a catkin workspace: __../catkin_ws/src/package_1.__
-也就是说 workspace 的 src 里可以有很多的 package，每个里面都有 package.xml + CMakeLists.txt。
+也就是说 workspace 的 src 里可以有很多的 package，每个里面都有 package.xml + CMakeLists.txt + its own folder。
 
 ---
 
 ```shell
-$ catkin_create_pkg <package_name> [depend1] [depend2] [depend3]
+$ cd ~/catkin_ws/src
+# catkin_create_pkg <package_name> [depend1] [depend2] [depend3]
+$ catkin_create_pkg package_1 std_msgs rospy roscpp
 ```
 
-自动产生 package.xml，这些 dependencies 会被记录到 package.xml 里。
+在 src 文件夹下自动产生 package_1 文件夹，内部包含 CMakeLists.txt 和 package.xml，这些 dependencies 会被记录到 package.xml 里。
 
 ---
 
 build the packages in the catkin_ws:
 
 ```shell
-$ catkin_make.
+$ cd ~/catkin_ws
+$ catkin_make
 ```
 
 __catkin_make combines the calls to cmake and make in the standard CMake workflow.__
-catkin_make 和 catkin build 好像不能混用，catkin build 好像是独立操作？
 
 ---
 
@@ -117,7 +116,7 @@ $ rospack depends [package_name]
 
 ---
 
-a package.xml is made up of:
+a __package.xml__ is made up of:
 * description tag: 描述包
 * maintainer tags: 维护者信息
 * license tags: 许可证信息
@@ -133,13 +132,19 @@ a package.xml is made up of:
 
 ## 5. Understanding ROS Nodes
 
-graph concepts:
+concepts:
 * __Nodes:__ A node is an __executable file whithin a ROS package__. Nodes use a ROS client library (Client Libraries 允许不同语言的 nodes 之间通信) to communicate with other nodes. Nodes can also provide or use a Service.
 * __Messages:__ ROS data type used when subscribing or publishing to a topic.
 * __Topics:__ Nodes can publish messages to a topic as well as subscribe to a topic to receive messages.
 * __Master:__ Name service for ROS (__i.e. helps nodes find each other__)
 * __rosout:__ ROS equivalent of stdout/stderr
-* __roscore:__ Master + rosout + parameter server. roscore is the first thing you should run when using ROS. 在 rosrun 节点之前先应该 `$ roscore`。
+* __roscore:__ Master + rosout + parameter server.
+
+__roscore is the first thing you should run when using ROS.__
+
+```shell
+$ roscore
+```
 
 ---
 
@@ -279,18 +284,10 @@ $ roslaunch [package] [filename.launch]
 
 rosed allows you to directly edit a file within a package by using the package name. __背后的默认编辑器是 vim。__
 
-```shell
-$ rosed [package_name] [filename]
-```
-
 ## 10. Creating a ROS msg and srv
 
-在 package 下新建和 src 并列的两个文件夹 msg 和 srv。
-
----
-
-msg: msg files are simple text files that describe the fields of a ROS message. They are used to generate source code for messages in different languages.
-srv: an srv file describes a service. It is composed of two parts: a request and a response. 如下：
+__msg:__ msg files are simple text files that describe the fields of a ROS message. They are used to generate source code for messages in different languages.
+__srv:__ an srv file __describes a service__. It is composed of two parts: a request and a response. 如下：
 
 ```xml
 int64 a
@@ -301,14 +298,49 @@ int64 sum
 
 ---
 
-```shell
-$ rosmsg -h
-$ rossrv -h
+Let's use msg.
+
+首先，创建 package_1/msg/Pose.msg 文件。
+
+```c++
+float64[3] pos
+float64[9] rot
 ```
+
+接着，__Turn the msg files into source code for C++, or other languages.__
+在 package.xml 中添加：
+
+```xml
+<build_depend>message_generation</build_depend>
+<exec_depend>message_runtime</exec_depend>
+```
+
+并在 CMakeLists.txt 中添加：
+
+```cmake
+find_package(catkin REQUIRED COMPONENTS
+    message_generation
+)
+catkin_package(
+    CATKIN_DEPENDS message_runtime ...
+)
+add_message_files(
+    FILES
+    Pose.msg
+)
+generate_messages(  # uncomment generate_messages()
+    DEPENDENCIES
+    geometry_msgs
+)
+```
+
+最后，catkin_make 会生成 devel/include/package_1/Pose.h 文件。
+
+__If you are building C++ nodes which use your new messages, you will also need to declare a dependency between your node and your message.__
 
 ## 11. Writing a Simple Publisher and Subscriber (node)
 
-create src/talker.cpp files within the package.
+首先 create a ros package. 再 create src/talker.cpp files within the package.
 
 ```c++{.line-numbers}
 #include "ros/ros.h"
