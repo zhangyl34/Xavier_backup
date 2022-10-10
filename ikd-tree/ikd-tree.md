@@ -4,7 +4,7 @@
 
 - [kd-Tree](#kd-tree)
 - [ikd-Tree](#ikd-tree)
-- [ikd-Tree 源码](#ikd-tree-源码)
+- [ikd-Tree 使用手册](#ikd-tree-使用手册)
 
 <!-- /code_chunk_output -->
 
@@ -85,6 +85,57 @@ ikd-Tree __插入节点与同步降采样__：
 
 首先将整个空间体素化，并明确新点落入哪个体素（目标体素）；然后向 ikd-Tree 查询目标体素内是否已经有点以及有哪些点；将已有点和新点一起排序，保留离体素中心最近的那个点。
 
-## ikd-Tree 源码
+## ikd-Tree 使用手册
+
+https://github.com/hku-mars/ikd-Tree
+
+```c++
+public:
+    // initialization
+    KD_TREE(float delete_param = 0.5, float balance_param = 0.6 , float box_length = 0.2);
+    ~KD_TREE();
+    void Set_delete_criterion_param(float delete_param);
+    void Set_balance_criterion_param(float balance_param);
+    void set_downsample_param(float box_length);
+    void InitializeKDTree(float delete_param = 0.5, float balance_param = 0.7, float box_length = 0.2);
+
+    // tree information
+    int size();
+    int validnum();
+    void root_alpha(float &alpha_bal, float &alpha_del);
+
+    // build an ikd-Tree from point cloud input.
+    void Build(PointVector point_cloud);
+
+    // insert new points into the ikd-Tree.
+    // 插入节点与同步降采样。
+    int Add_Points(PointVector & PointToAdd, bool downsample_on);\
+
+    // recover the deleted points inside given axis-aligned bounding boxes in the ikd-Tree.
+    void Add_Point_Boxes(vector<BoxPointType> & BoxPoints);
+
+    // delete points from the ikd-Tree.
+    void Delete_Points(PointVector & PointToDel);
+
+    // delete points inside given axis-aligned bounding boxes from the ikd-Tree.
+    int Delete_Point_Boxes(vector<BoxPointType> & BoxPoints);
+
+    // search k nearest neighbors of the target point on the ikd-Tree.
+    // 参数 max_dist 表示搜索的最大范围。
+    void Nearest_Search(PointType point, int k_nearest, PointVector &Nearest_Points, 
+        vector<float> & Point_Distance, double max_dist = INFINITY);
+
+    // return the points inside the given axis-aligned bounding box.
+    void Box_Search(const BoxPointType &Box_of_Point, PointVector &Storage);
+    
+    // return the points inside a ball with the given center point and the radius.
+    void Radius_Search(PointType point, const float radius, PointVector &Storage);
+
+    /* */
+    void flatten(KD_TREE_NODE * root, PointVector &Storage, delete_point_storage_set storage_type);
+    void acquire_removed_points(PointVector & removed_points);
+```
+
+
 
 
