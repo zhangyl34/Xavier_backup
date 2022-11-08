@@ -509,16 +509,16 @@ __文件结构：__
 
 ```txt
 lio_ros
-|----build  // catkin_make 自动生成
-|----devel  // catkin_make 自动生成
-|----src
-     |----CMakeLists.txt  // catkin_make 自动生成
-     |----lio
-     |    |----src
-     |    |----CMakeLists.txt  // 同时拥有这两个文件，
-     |    |----package.xml     // 代表当前文件夹是一个 ros 包
+|____build  // catkin_make 自动生成
+|____devel  // catkin_make 自动生成
+|____src
+     |____CMakeLists.txt  // catkin_make 自动生成
+     |____lio
+     |    |____src
+     |    |____CMakeLists.txt  // 同时拥有这两个文件，
+     |    |____package.xml     // 代表当前文件夹是一个 ros 包
      |
-     |----livox_ros_driver
+     |____livox_ros_driver
 ```
 
 __编译并在 VS Code 中调试：__
@@ -530,4 +530,16 @@ __编译并在 VS Code 中调试：__
 5. 开始 Debug，Attach 到正在运行的可执行文件。
 
 <img src="img/launch.png" width=60%>
+
+__消息回调：__
+
+在程序执行过程中，ROS 会自动在后台接收订阅的消息。但是收到的消息并不是立刻被处理，而是等到 ros::spin() 或 ros::spinOnce() 执行的时候才被调用。
+
+ros::spin() 会一直调用，因此程序不再往下执行。所以 ros::spin() 一般位于程序末尾。
+ros::spinOnce() 只调用一次，在调用后还可以继续执行之后的程序。如果还想再次调用，就需要搭配循环。
+
+注意：ros::spinOnce() 只调用一次，但会多次触发回调函数，以将消息队列中的缓存数据全部处理完。
+
+<img src="img/spinOnce.png" width=60%>
+
 
