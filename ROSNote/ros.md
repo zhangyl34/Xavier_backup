@@ -17,6 +17,8 @@
   - [14. Writing a Simple Service and Client (node)](#14-writing-a-simple-service-and-client-node)
   - [17. Recording and Playing back data](#17-recording-and-playing-back-data)
   - [18. Getting started with roswtf](#18-getting-started-with-roswtf)
+- [实战](#实战)
+  - [LIO](#lio)
 
 <!-- /code_chunk_output -->
 
@@ -499,4 +501,33 @@ $ rosbag play -r 2 <your_bagfile>
 
 roswtf examines your system to try and find problems.
 
+# 实战
+
+## LIO
+
+__文件结构：__
+
+```txt
+lio_ros
+|----build  // catkin_make 自动生成
+|----devel  // catkin_make 自动生成
+|----src
+     |----CMakeLists.txt  // catkin_make 自动生成
+     |----lio
+     |    |----src
+     |    |----CMakeLists.txt  // 同时拥有这两个文件，
+     |    |----package.xml     // 代表当前文件夹是一个 ros 包
+     |
+     |----livox_ros_driver
+```
+
+__编译并在 VS Code 中调试：__
+
+1. CMakeLists.txt 中设置 debug 模式，catkin_make 编译通过。
+2. 装 ROS 扩展。
+3. 在 launch.json 中 add configurations："ROS: Attach"。
+4. 在 VS Code 的 terminal 中输入：roslaunch lio mapping_avia.launch。
+5. 开始 Debug，Attach 到正在运行的可执行文件。
+
+<img src="img/launch.png" width=60%>
 
