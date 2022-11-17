@@ -17,8 +17,11 @@
   - [14. Writing a Simple Service and Client (node)](#14-writing-a-simple-service-and-client-node)
   - [17. Recording and Playing back data](#17-recording-and-playing-back-data)
   - [18. Getting started with roswtf](#18-getting-started-with-roswtf)
-- [实战](#实战)
-  - [LIO](#lio)
+- [LIO 实战](#lio-实战)
+  - [文件结构](#文件结构)
+  - [编译并在 VS Code 中调试](#编译并在-vs-code-中调试)
+  - [消息回调](#消息回调)
+  - [rosbag](#rosbag)
 
 <!-- /code_chunk_output -->
 
@@ -129,7 +132,7 @@ a __package.xml__ is made up of:
 
 当完成 catkin_make 之后，会自动在 workspace 下生成：
 * build
-* __devel: executalbes 和 libraries 被放到这儿，以便 install packages 时使用？__
+* __devel: executalbes 和 libraries 被放到这儿__
 * src (catkin_make 之前就有)
 
 ## 5. Understanding ROS Nodes
@@ -491,21 +494,15 @@ modify the CMakeLists.txt. And finally run: `catkin_make`.
 
 ## 17. Recording and Playing back data
 
-```shell
-$ rosbag record -a
-$ rosbag info <your_bagfile>
-$ rosbag play -r 2 <your_bagfile>
-```
+详见“LIO 实战”章节。
 
 ## 18. Getting started with roswtf
 
 roswtf examines your system to try and find problems.
 
-# 实战
+# LIO 实战
 
-## LIO
-
-__文件结构：__
+## 文件结构
 
 ```txt
 lio_ros
@@ -521,17 +518,17 @@ lio_ros
      |____livox_ros_driver
 ```
 
-__编译并在 VS Code 中调试：__
+## 编译并在 VS Code 中调试
 
 1. CMakeLists.txt 中设置 debug 模式，catkin_make 编译通过。
-2. 装 ROS 扩展。
+2. VS Code 装 ROS 扩展。
 3. 在 launch.json 中 add configurations："ROS: Attach"。
 4. 在 VS Code 的 terminal 中输入：roslaunch lio mapping_avia.launch。
 5. 开始 Debug，Attach 到正在运行的可执行文件。
 
 <img src="img/launch.png" width=60%>
 
-__消息回调：__
+## 消息回调
 
 在程序执行过程中，ROS 会自动在后台接收订阅的消息。但是收到的消息并不是立刻被处理，而是等到 ros::spin() 或 ros::spinOnce() 执行的时候才被调用。
 
@@ -542,4 +539,22 @@ ros::spinOnce() 只调用一次，在调用后还可以继续执行之后的程�
 
 <img src="img/spinOnce.png" width=60%>
 
+## rosbag
 
+__查看 rosbag 里的数据：__
+
+http://wiki.ros.org/cn/rosbag/Tutorials/reading%20msgs%20from%20a%20bag%20file
+
+```shell
+$ rosbag info outdoor.bag  # 查看简明信息
+$ rostopic echo /livox/lidar | tee topic_lidar.yaml
+$ rosbag play outdoor.bag
+```
+
+也可以使用 ros_readbagfile 脚本。
+
+__存储数据到 rosbag：__
+
+```shell
+$ rosbag record /imu  # topic name.
+```
