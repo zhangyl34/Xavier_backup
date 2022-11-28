@@ -266,15 +266,50 @@ __Loss Function__
 
 ### PV-CNN 
 
+这篇文章综述部分作了网络分类，值得学习。
 
+__voxel-based 与 point-based 方法的不足之处__
 
+<img src="img/pvcnn_1.png" width=80%>
 
-后者很难提取邻域的上下文特征，并且内存的访问是不规则的（大约 80% 的运行时间都耗费在数据构建，而不是真正的特征提取上）。因此，两者融合的基本思路是：利用较低分辨率的 Voxel 来提取上下文特征（比如 PV-CNN ）或者生成物体候选（Fast Point RCNN ），或者二者兼有（比如 PV-RCNN，SA-SSD），然后再与原始的点云结合，这样单个点的特征和点点之间的空间关系也可以同时保留。在 PV-CNN 中，一个分支采用低分辨率的 Voxel 来提取具有邻域信息的特征，然后再通过插值的方法映射回每个点上。另一个分支直接从原始点出发，利用MLP来提取点特征，这时虽然没有邻域信息，但是单个点的特征提取是相对精确的。最后把两个分支的特征进行拼接，作为下一步的输入。​
+1. voxel-based
+<font color=OrangeRed>图 1(a) 表明，相比于算术运算，内存操作消耗的时间和能量更为昂贵。</font>
+而 voxel-based 方法的内存消耗与分辨率成三次相关，是巨大的。
 
+2. point-based
+<font color=OrangeRed>图 1(b) 表明，随机内存访问非常低效。</font>
+而 point-based 方法的点云存储是无序的，所以在近邻查找时非常低效。
+另外，有些 point-based 方法会根据点云相对位置关系使用动态卷积核。这一步操作同样很低效。
+
+__网络结构__
+
+<img src="img/pvcnn_2.png" width=80%>
+
+1. Voxel-Based Feature Aggregation
+先将点云坐标归一化到单位球内。
+再将空间体素化，将体素内的点云特征取均值作为体素特征。
+再作 3D 巻积。
+最后插值得到每个点云的邻域特征。
+
+2. Point-Based Feature Transformation
+逐点学习点云的自身特征。
+
+3. Feature Fusion
+拼接点云的邻域特征和自身特征。
+
+<font color=OrangeRed>point-based 分支其实就是 PointNet。voxel-based 分支用 3D 巻积提取邻域特征，而 PointNet++ 用 SA 提取邻域特征。实验表明，3D 巻积提取邻域特征更快也更好。</font>
 
 ### PV-RCNN
 
 PV-RCNN 的一个分支将点云量化到不同分辨率的 Voxel，以提取上下文特征和生成 3D 物体候选。另外一条分支上采用类似于 PointNet++ 中 Set Abstraction 的操作来提取点特征。这里比较特别的是，每个点的领域点并不是原始点云中的点，而是 Voxel 中的点。由于 Voxel 中的点具有多分辨率的上下文信息，点特征提取也就同时兼顾了单个点以及邻域信息，这与 PV-CNN 中的思路是类似的。值得一提的是，PV-RCNN 和 Fast Point RCNN 都属于两阶段的检测方法，有一个 ROI Pooling 的步骤，因此运行速度会收到影响（PV-RCNN 只有 12.5 FPS，Fast Point R-CNN 也只有 16.7 FPS）。
+
+
+
+我在另外一篇博客中记录了PV-RCNN的阅读笔记，这里就做一下对比。
+KITTI屠榜专家的最新方法PV-RCNN也是将Point-based的方法和Voxel-based的方法结合起来，这里就对比一下这两篇文章的不同：
+首先对应解决的问题不一样：本文其实还是解决了点云处理过程中的问题，也就是说提出了一种对点云实现Conv的新的操作方式，也就是该方法还是使用在backbone中的，可以把PV-Conv运用到各种问题中，对相应的conv进行替换。而PV-RCNN则是提出了针对目标检测领域一个framework，并没有PV-Conv这种普适性。
+解决的思路是不一样的：上文已经将PVCNN的思路解释的非常清楚了，这里说一下PV-RCNN的解决思路。PV-RCNN的融合思路在于，能不能将非常庞大的点云数据的特征集中到少量representative points上？那么就是首先体素化，使用3D卷积得到不同scale的特征图。然后从点云中选取一些点作为representative point，使用point-based的方法在得到的不同scale的特征图中再一次aggregate特征，得到每个representative point的特征。这样子，representative point就包含了整个点云空间的特征。这种想法是与3D目标检测中使用的point来预测box的这种常用手段相关联的。
+从具体操作上看：两者都实现了point在体素上提取特征，PVCNN用的是插值，PV-RCNN用的是Pointnet++；PVCNN的从体素上提取特征的点是逐层减少的，而且是融到了整个特征金字塔中，PV-RCNN的点的数量是固定的，是从3D卷积和下采样得到的特征金字塔中提取特征的，point是在金字塔之外的。所以从信息的细节程度上来说还是PV-CNN更细一些。
 
 
 
