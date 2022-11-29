@@ -3,7 +3,7 @@
 <!-- code_chunk_output -->
 
 - [点云物体检测](#点云物体检测)
-  - [萌芽期（～2017）](#萌芽期~2017)
+  - [萌芽期（～2016）](#萌芽期~2016)
   - [起步期（2017）](#起步期2017)
     - [VoxelNet](#voxelnet)
     - [PointNet](#pointnet)
@@ -14,12 +14,16 @@
     - [3DSSD](#3dssd)
     - [PV-CNN](#pv-cnn)
     - [PV-RCNN](#pv-rcnn)
+  - [落地期（2021～）](#落地期2021~)
+    - [Voxel R-CNN](#voxel-r-cnn)
+    - [CIA-SSD](#cia-ssd)
+  - [参考文献](#参考文献)
 
 <!-- /code_chunk_output -->
 
 # 点云物体检测
 
-## 萌芽期（～2017）
+## 萌芽期（～2016）
 
 将 3D 点云转换为 2D 图像格式，就可以套用图像的物体检测网络。
 
@@ -66,11 +70,14 @@ __Convolutional Middle Layer__
 
 __Region Proposal Network__
 
+文中预定义了两个 anchor，长宽高不变，角度分别是 0 和 90 度。
+<font color=OrangeRed>相反朝向的物体归于同一个 anchor。换句话说，网络要学会翻转点云特征。</font>
+
 <img src="img/voxelnet_4.png" width=100%>
 
 1. Regression map
 ground truth box 可以用一个 7 维向量表示 $(x_c^g,y_c^g,z_c^g,l^g,w^g,h^g,\theta^g)$。
-文中预定义了两个 anchor。Regression map 中的 14 维向量，就是在学习从预定义 anchor 到 ground truth box 的变换 $(\Delta x,\Delta y,\Delta z,\Delta l,\Delta w,\Delta h,\Delta \theta)$。<font color=OrangeRed>全局尺度的 x,y,z 信息没有学习的意义；估计 l,w,h 的变换量有点归一化的意思。</font>
+Regression map 中的 14 维向量，对应从两个 anchor 到 ground truth box 的变换 $(\Delta x,\Delta y,\Delta z,\Delta l,\Delta w,\Delta h,\Delta \theta)$。<font color=OrangeRed>全局尺度的 x,y,z 信息没有学习的意义；估计 l,w,h 的变换量有点归一化的意思。</font>
 
 2. Probability score map
 两个 anchor 的置信度。
@@ -266,7 +273,7 @@ __Loss Function__
 
 ### PV-CNN 
 
-这篇文章综述部分作了网络分类，值得学习。
+<font color=OrangeRed>本文提出了一种对点云提取特征的方法，可以应用到更广的网络结构中。</font>
 
 __voxel-based 与 point-based 方法的不足之处__
 
@@ -292,7 +299,7 @@ __网络结构__
 最后插值得到每个点云的邻域特征。
 
 2. Point-Based Feature Transformation
-逐点学习点云的自身特征。
+==逐点==学习点云的自身特征。
 
 3. Feature Fusion
 拼接点云的邻域特征和自身特征。
@@ -301,18 +308,60 @@ __网络结构__
 
 ### PV-RCNN
 
-PV-RCNN 的一个分支将点云量化到不同分辨率的 Voxel，以提取上下文特征和生成 3D 物体候选。另外一条分支上采用类似于 PointNet++ 中 Set Abstraction 的操作来提取点特征。这里比较特别的是，每个点的领域点并不是原始点云中的点，而是 Voxel 中的点。由于 Voxel 中的点具有多分辨率的上下文信息，点特征提取也就同时兼顾了单个点以及邻域信息，这与 PV-CNN 中的思路是类似的。值得一提的是，PV-RCNN 和 Fast Point RCNN 都属于两阶段的检测方法，有一个 ROI Pooling 的步骤，因此运行速度会收到影响（PV-RCNN 只有 12.5 FPS，Fast Point R-CNN 也只有 16.7 FPS）。
+也是一个两阶段检测器。
+
+<img src="img/pvrcnn_2.png" width=100%>
+
+__3D Voxel CNN for Efficient Feature Encoding and Proposal Generation__
+
+1. 3D voxel CNN
+空间体素化；将体素内的点云特征取均值作为体素特征；进行稀疏巻积；最终输出 8 倍降采样的 3D 特征地图。
+
+2. 3D proposal generation
+堆叠 z 轴特征，得到 2D 特征地图；沿袭 VoxelNet，设置 anchor，每一类物体都有 $2 \times \frac{L}{8} \times \frac{W}{8}$ 个 anchor。
+
+__Voxel-to-keypoint Scene Encoding via Voxel Set Abstraction__
+
+1. Keypoints Sampling
+FPS 法采样。
+
+2. Voxel Set Abstraction Module
+在不同尺度下（蓝绿黄红）索引特征点的邻域体素；将邻域体素特征集合输入 PointNet，输出该尺度下的邻域特征向量；最后将不同尺度下的邻域特征向量拼接。
+
+3. Extended VSA Module
+将原始邻域点云输入 PointNet，输出原始邻域特征向量（灰），进行拼接；对 2D 特征地图进行插值，得到鸟瞰特征向量（紫），也进行拼接。
+
+4. Predicted Keypoint Weighting
+<font color=OrangeRed>前景点对 proposal 的 fine tune 应该发挥更大的作用，因此这一步估计每个特征点的权重（前景点权重更大）。</font>
+
+__Keypoint-to-grid RoI Feature Abstraction for Proposal Refinement__
+
+1. RoI-grid Pooling via Set Abstraction
+<img src="img/pvrcnn_4.png" width=45%>
+对每个 proposal 生成 6x6x6 的 grid，grid 的中心点称为 grid point；对每个 grid point 取特征点作 set abstraction 操作，得到 grid point 的特征向量；将这些特征向量投入后续网络，优化 proposal。
+<font color=OrangeRed>与 Point-RCNN 相比（同为两阶段检测器），此处用于 fine tune 的 grid point 特征还融合了背景特征。</font>
+
+## 落地期（2021～）
+
+### Voxel R-CNN
+
+也是一个两阶段检测器。
+只用 voxel 提取特征，结构更加简洁。
+
+<img src="img/voxelrcnn_1.png" width=50%>
+
+<img src="img/voxelrcnn_2.png" width=100%>
+
+__Voxel RoI Pooling__
 
 
 
-我在另外一篇博客中记录了PV-RCNN的阅读笔记，这里就做一下对比。
-KITTI屠榜专家的最新方法PV-RCNN也是将Point-based的方法和Voxel-based的方法结合起来，这里就对比一下这两篇文章的不同：
-首先对应解决的问题不一样：本文其实还是解决了点云处理过程中的问题，也就是说提出了一种对点云实现Conv的新的操作方式，也就是该方法还是使用在backbone中的，可以把PV-Conv运用到各种问题中，对相应的conv进行替换。而PV-RCNN则是提出了针对目标检测领域一个framework，并没有PV-Conv这种普适性。
-解决的思路是不一样的：上文已经将PVCNN的思路解释的非常清楚了，这里说一下PV-RCNN的解决思路。PV-RCNN的融合思路在于，能不能将非常庞大的点云数据的特征集中到少量representative points上？那么就是首先体素化，使用3D卷积得到不同scale的特征图。然后从点云中选取一些点作为representative point，使用point-based的方法在得到的不同scale的特征图中再一次aggregate特征，得到每个representative point的特征。这样子，representative point就包含了整个点云空间的特征。这种想法是与3D目标检测中使用的point来预测box的这种常用手段相关联的。
-从具体操作上看：两者都实现了point在体素上提取特征，PVCNN用的是插值，PV-RCNN用的是Pointnet++；PVCNN的从体素上提取特征的点是逐层减少的，而且是融到了整个特征金字塔中，PV-RCNN的点的数量是固定的，是从3D卷积和下采样得到的特征金字塔中提取特征的，point是在金字塔之外的。所以从信息的细节程度上来说还是PV-CNN更细一些。
 
 
 
-Fast Point RCNN
+### CIA-SSD
+是一个基于 Voxel 的单阶段检测方法。其特征提取阶段与 SECOND 类似，都是采用稀疏 3D 卷积。不同的是 CIA-SSD 将网格内点的均值作为起始特征（没有采用 VoxelNet 中的多阶段 MLP），而且通过不断降低空间分辨率来进一步减少计算量，最后将Z方向的特征拼接以得到 2D 特征图（类似 VoxelNet 中的做法）。作为一个单阶段的检测器，CIA-SSD 借鉴了图像物体检测领域的一些技巧。比如，为了更好的提取空间和语义特征，CIA-SSD 采用了一种类似于 Feature Pyramid Network （FPN）的结构，当然这里的细节设计稍微复杂一些。此外，为了解决单阶段检测器分类置信度和定位准确度之间的差异问题，CIA- SSD 采用了 IoU 预测分支，以修正分类的置信度和辅助 NMS。结合以上这些策略，CIA-SSD 在 KITTI 车辆检测的 AP 达到 80.28%，速度为 33 FPS。CIA-SSD 之后被扩展为 SE-SSD，速度不变，AP 提升到 82.54%，这其实已经超越了基于 Voxel 和 Point 融合的两阶段检测器。
 
-SA-SSD
+## 参考文献
+
+https://www.51cto.com/article/701356.html
