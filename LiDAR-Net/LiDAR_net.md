@@ -338,7 +338,7 @@ __Keypoint-to-grid RoI Feature Abstraction for Proposal Refinement__
 
 1. RoI-grid Pooling via Set Abstraction
 <img src="img/pvrcnn_4.png" width=45%>
-对每个 proposal 生成 6x6x6 的 grid，grid 的中心点称为 grid point；对每个 grid point 取特征点作 set abstraction 操作，得到 grid point 的特征向量；将这些特征向量投入后续网络，优化 proposal。
+对每个 proposal 生成 6x6x6 的 grid，grid 的中心点称为 grid point；对每个 grid point 取邻域特征点作 set abstraction 操作，得到 grid point 的特征向量；将这些特征向量投入后续网络，优化 proposal。
 <font color=OrangeRed>与 Point-RCNN 相比（同为两阶段检测器），此处用于 fine tune 的 grid point 特征还融合了背景特征。</font>
 
 ## 落地期（2021～）
@@ -348,19 +348,52 @@ __Keypoint-to-grid RoI Feature Abstraction for Proposal Refinement__
 也是一个两阶段检测器。
 只用 voxel 提取特征，结构更加简洁。
 
-<img src="img/voxelrcnn_1.png" width=50%>
-
 <img src="img/voxelrcnn_2.png" width=100%>
 
 __Voxel RoI Pooling__
 
+1. Voxel RoI Pooling Layer
+对每个 proposal 生成 GxGxG 的 grid，grid 的中心点称为 grid point；对每个 grid point 取 K 个邻域体素输入 PointNet，得到 grid point 的特征向量。
 
-
-
-
+2. Accelerated Local Aggregation
+<img src="img/voxelrcnn_4.png" width=45%>
+对于 M 个 grid points，PointNet 每次都要全连接 K 个 (C+3) 长度的输入与 1 个 C' 长度的输出，FLOPs 为 O(MxKx(C+3)xC')。
+<font color=OrangeRed>但是，全连接层对特征向量 (NxC) 进行了多次重复运算，非常低效。</font>
+于是提出先对特征向量 (NxC) 进行全连接运算，再 query，FLOPs 降为 O(M×K×3×C'+N×C×C')。
 
 ### CIA-SSD
-是一个基于 Voxel 的单阶段检测方法。其特征提取阶段与 SECOND 类似，都是采用稀疏 3D 卷积。不同的是 CIA-SSD 将网格内点的均值作为起始特征（没有采用 VoxelNet 中的多阶段 MLP），而且通过不断降低空间分辨率来进一步减少计算量，最后将Z方向的特征拼接以得到 2D 特征图（类似 VoxelNet 中的做法）。作为一个单阶段的检测器，CIA-SSD 借鉴了图像物体检测领域的一些技巧。比如，为了更好的提取空间和语义特征，CIA-SSD 采用了一种类似于 Feature Pyramid Network （FPN）的结构，当然这里的细节设计稍微复杂一些。此外，为了解决单阶段检测器分类置信度和定位准确度之间的差异问题，CIA- SSD 采用了 IoU 预测分支，以修正分类的置信度和辅助 NMS。结合以上这些策略，CIA-SSD 在 KITTI 车辆检测的 AP 达到 80.28%，速度为 33 FPS。CIA-SSD 之后被扩展为 SE-SSD，速度不变，AP 提升到 82.54%，这其实已经超越了基于 Voxel 和 Point 融合的两阶段检测器。
+
+是一个基于 voxel 的单阶段检测器。
+<font color=OrangeRed>CIA-SSD 之后被扩展为 SE-SSD，速度为 33 FPS，AP 提升到 82.54%，甚至超越了两阶段检测器。</font>
+
+<img src="img/ciassd_3.png" width=100%>
+
+__Point Cloud Encoder__
+
+空间体素化，将体素内的点云平均坐标和点云密度作为体素起始特征，投入 SPConvNet，最后拼接 z 方向特征得到 2D 特征地图。
+<font color=OrangeRed>直接忽略了体素内的局部特征，却依然取得了很好的效果。</font>
+
+__Spatial-Semantic Feature Aggregation__
+
+<font color=OrangeRed>降采样学习 semantic feature 时，会损失 spatial feature 的信息。</font>所以学习 spatial feature 时不改变特征地图的尺寸；而学习 semantic feature 时，特征地图的通道扩大两倍，尺寸缩小 1/2。
+fusion 模块将两张特征地图压缩为两个特征向量，再拼接，再 softmax，再重新拆为两个权重向量，用于自适应地融合 spatial 特征与 semantic 特征。
+
+__IoU-Aware Confidence Rectification__
+
+e 模块中的 iou reg 用于预测 IoU 的值。
+<font color=OrangeRed>IoU 是可预测的，因为如果当前的体素拥有足够丰富的特征，那么预测出来的 b-box 应该更准，IoU 应该更大。</font>
+<font color=OrangeRed>预测 IoU 的作用类似于 3DSSD 中计算 centerness 的作用，用于更新置信度。</font>
+
+__Distance-Variant IoU-Weighted NMS__
+
+<img src="img/ciassd_alg1a.png" width=45%>
+<img src="img/ciassd_alg1b.png" width=45%>
+
+远处的点云比较稀疏，有可能产生 false-positive candidate。
+
+1~2: 用 centerness 进一步更新置信度。
+5~7: 取置信度最高的 b-box：c'；筛选 c' 的支持集：L'；统计 c' 的票数。<font color=OrangeRed>这一步可以过滤掉 false-positive candidate。</font>
+8: 拟合 c' 投票集的高斯分布，fine tune b-box。
 
 ## 参考文献
 
