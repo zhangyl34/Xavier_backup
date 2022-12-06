@@ -541,20 +541,23 @@ ros::spinOnce() 只调用一次，在调用后还可以继续执行之后的程�
 
 ## rosbag
 
+__存储数据到 rosbag：__
+
+```shell
+$ roslaunch fdilink_ahrs ahrs_data.launch
+$ roslaunch livox_lidar_msg.launch
+$ rosbag record /imu /livox/lidar  # topic name.
+```
+
 __查看 rosbag 里的数据：__
 
 http://wiki.ros.org/cn/rosbag/Tutorials/reading%20msgs%20from%20a%20bag%20file
 
 ```shell
 $ rosbag info outdoor.bag  # 查看简明信息
-$ rostopic echo /livox/lidar | tee topic_lidar.yaml
 $ rosbag play outdoor.bag
+$ rostopic echo /livox/lidar | tee topic_lidar.yaml
 ```
 
 也可以使用 ros_readbagfile 脚本。
 
-__存储数据到 rosbag：__
-
-```shell
-$ rosbag record /imu  # topic name.
-```
