@@ -15,6 +15,7 @@
   - [FAST-LIO2: Fast Direct LiDAR-Inertial Odometry](#fast-lio2-fast-direct-lidar-inertial-odometry)
   - [Kalman Filters on Differentiable Manifolds](#kalman-filters-on-differentiable-manifolds)
   - [Faster-LIO: Lightweight Tightly Coupled Lidar-Inertial Odometry Using Parallel Sparse Incremental Voxels](#faster-lio-lightweight-tightly-coupled-lidar-inertial-odometry-using-parallel-sparse-incremental-voxels)
+  - [FAST_LIO_SAM](#fast_lio_sam)
 - [FAST-LIO2 源码梳理](#fast-lio2-源码梳理)
   - [主循环](#主循环)
   - [消息格式](#消息格式)
@@ -332,17 +333,17 @@ __另一种角度看 EEKF：__
 
 https://www.guyuehome.com/blog/column/id/167
 
-<img src="/img/lio2_fig1.jpg" width=100%>
+<img src="img/lio2_fig1.jpg" width=100%>
 
 __改进：__
 
 1. 状态更多了，位置更新更精确了，还增加了 LiDAR-IMU 的外参估计。
-  <img src="/img/lio2_eq5.jpg" width=45%>
+  <img src="img/lio2_eq5.jpg" width=45%>
 
 2. 不用线，面特征点而使用全局点云。
   文章中提到的第一点，通过原始点云与地图的配准，可以有效地利用环境中的细微特征，从而提高准确性，同时不使用特征提取也可以更好地适应不同的激光雷达。得益于 ikd-Tree，Fast-LIO2 不再是类似 LOAM 般的提取 edge 特征与 plane 特征，而是直接将每个三维点与地图配准。
-  <img src="/img/lio2_fig2.jpg" width=60%>
-  <img src="/img/lio2_eq9.jpg" width=45%>
+  <img src="img/lio2_fig2.jpg" width=60%>
+  <img src="img/lio2_eq9.jpg" width=45%>
 
 3. 使用 ikd-Tree 存储点云。
 
@@ -360,6 +361,13 @@ __n 维流形：__ 局部同胚于 $\mathbb{R}^n$。
 https://zhuanlan.zhihu.com/p/541776806
 
 FASTER-LIO 作为 FAST-LIO2 的续作，通过一些处理将速率进一步提升，文中不使用复杂的基于树的结构来划分空间点云，而使用增量体素 iVox 作为点云空间数据结构，它是从传统体素修改而来的，支持增量插入和并行近似 k-NN 查询。
+
+### FAST_LIO_SAM
+
+主要贡献：
+1. 对比 FAST_LIO_SLAM 与 FAST_LIO_LC 使用外部接入的 PGO 回环检测模块进行后端优化，FAST_LIO_SAM 将 LIO-SAM 的后端 GTSAM 优化部分移植到 FAST-LIO2 的代码中，数据传输处理环节更加清晰。
+2. 增加关键帧的保存，可通过 rosservice 的指令对地图和轨迹进行保存。
+3. FAST_LIO_SLAM 中的后端优化，只使用了 GPS 的高层进行约束，GPS 的高层一般噪声比较大，所以添加 GPS 的 XYZ 三维的 postion 进行 GPS 先验因子约束。
 
 ## FAST-LIO2 源码梳理
 

@@ -18,6 +18,12 @@
     - [Voxel R-CNN](#voxel-r-cnn)
     - [CIA-SSD](#cia-ssd)
   - [参考文献](#参考文献)
+- [物体语义分割与实例分割](#物体语义分割与实例分割)
+    - [RandLA-Net](#randla-net)
+    - [3D-BoNet](#3d-bonet)
+    - [3D-MAN](#3d-man)
+    - [FlowStep3D](#flowstep3d)
+    - [OGC](#ogc)
 
 <!-- /code_chunk_output -->
 
@@ -398,3 +404,27 @@ __Distance-Variant IoU-Weighted NMS__
 ## 参考文献
 
 https://www.51cto.com/article/701356.html
+
+# 物体语义分割与实例分割
+
+### RandLA-Net
+
+大场景下的点云语义分割：用 attractive pooling 代替 max pooling，保留更多的局部信息；用随机采样替换 FPS，提升效率。
+
+### 3D-BoNet
+
+点云实例分割：两阶段方法，先预测 b-box，再实例分割。
+
+### 3D-MAN
+
+多帧融合的目标检测：单视角点云图可能存在歧义；大多数的目标检测公开数据集都是单帧的；而且不难想象点云序列越长，点云畸变会越严重。
+
+### FlowStep3D
+
+自监督场景流估计：输入连续两帧点云数据，估计点云场景流。
+
+### OGC
+
+基于 FlowStep3D 的自监督点云实例分割：基于学到的场景流，作实例分割；再用分割得到的实例，校正场景流。迭代，优化结果。
+
+
