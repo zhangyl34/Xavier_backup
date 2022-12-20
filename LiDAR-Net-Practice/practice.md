@@ -11,7 +11,6 @@ __1. 体素地图美化__
 __2. RANSAC 方法点云粗配准__
 
 ==前提假设：VoteNet 已经估计出了“大致准确”的台车 b-box。换句话说，已知“大致准确”的台车位姿。接下来分两步优化台车位姿：RANSAC 粗调；ICP 精调。==
-<img src="img/12_19_bbox.png" width=40%>
 
 * source model:
 b-box 内部点云 -> 剔除具有自由度的点云
@@ -50,12 +49,6 @@ __3. ICP 方法点云精配准__
 
 * 精匹配结果：
 <img src="img/12_19_match3.png" width=50%>
-
-__4. VoteNet__
-
-
-
-
 
 # VoteNet 实战
 
