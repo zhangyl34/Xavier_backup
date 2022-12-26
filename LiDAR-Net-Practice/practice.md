@@ -1,3 +1,14 @@
+<!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
+
+<!-- code_chunk_output -->
+
+- [组会](#组会)
+  - [12.19 组会](#1219-组会)
+  - [12.26 组会](#1226-组会)
+- [VoteNet](#votenet)
+  - [数据集](#数据集)
+
+<!-- /code_chunk_output -->
 
 # 组会
 
@@ -50,7 +61,53 @@ __3. ICP 方法点云精配准__
 * 精匹配结果：
 <img src="img/12_19_match3.png" width=50%>
 
-# VoteNet 实战
+## 12.26 组会
+
+
+
+# VoteNet
+
+## 数据集
+
+==原文验证过两个数据集：==
+__SUN RGB-D:__ rgb-d 相机拍照，手动标注 b-box。每张图片的点云数量约 20K。
+__ScanNet:__ rgb-d 相机拍视频，多帧融合生成场景，手动标注 semantic-label。
+
+==任务：==
+仿照 SUN RGB-D，生成一组虚拟深度图，再从深度图构建点云，作为最终的虚拟数据集。
+
+==参考项目：==
+__Segmenting Unknown 3D Objects from Real Depth Images using Mask R-CNN Trained on Synthetic Data__
+The International Conference on Robotics and Automation (ICRA 2019)
+<img src="img/syn_lit.png" width=90%>
+提出了一种生成虚拟点云数据集的方法。
+实验表明，虚拟训练集训练出的网络在测试集上的表现，可以媲美真实训练集。
+
+==识别目标：==
+<img src="img/syn_tar.png" width=80%>
+为了让网络更加鲁棒，由精细到粗糙生成了 3 个手术台车的模型，简记为 cart。
+
+==手术室虚拟环境：==
+<img src="img/syn_obj.png" width=80%>
+搜集了 19 个手术室设备的模型，作为虚拟环境，简记为 envs。
+
+==策略：==
+<img src="img/syn_strategy.png" width=80%>
+1. 将 7mx9m 的 room 分割为 12 个 尺寸为 2mx2m 的 box。
+2. 从左往右第二列的随机两个相邻 box 内，会生成一个 cart；第二列的剩余一个 box 和第三四列的六个 box 会各自随机生成一个 envs。
+3. 相机随机在第一列的多个视角拍摄 cart，生成深度图。
+4. 设置高度会变的天花板，防止网络从天花板高度预测台车高度。
+
+==输出：==
+<img src="img/syn_out1.png" width=80%>
+
+<img src="img/syn_out2.png" width=45%>
+<img src="img/syn_out3.png" width=45%>
+
+<img src="img/syn_out4.png" width=45%>
+
+
+
 
 
 
