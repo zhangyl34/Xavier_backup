@@ -21,6 +21,8 @@ __1. 体素地图美化__
 
 __2. RANSAC 方法点云粗配准__
 
+http://www.open3d.org/docs/release/
+
 ==前提假设：VoteNet 已经估计出了“大致准确”的台车 b-box。换句话说，已知“大致准确”的台车位姿。接下来分两步优化台车位姿：RANSAC 粗调；ICP 精调。==
 
 * source model:
@@ -71,10 +73,10 @@ __3. ICP 方法点云精配准__
 
 ==原文验证过两个数据集：==
 __SUN RGB-D:__ rgb-d 相机拍照，手动标注 b-box。每张图片的点云数量约 20K。
-__ScanNet:__ rgb-d 相机拍视频，多帧融合生成场景，手动标注 semantic-label。
+__ScanNet:__ rgb-d 相机拍视频，多帧融合生成场景，手动标注 semantic-label。每个场景的点云数量约 40K。
 
 ==任务：==
-仿照 SUN RGB-D，生成一组虚拟深度图，再从深度图构建点云，作为最终的虚拟数据集。
+仿照 ScanNet，每组场景生成四张不同视角的虚拟深度图，再从深度图构建点云，并对四片点云进行拼接，合成一整片场景点云，作为最终的虚拟数据集。
 
 ==参考项目：==
 __Segmenting Unknown 3D Objects from Real Depth Images using Mask R-CNN Trained on Synthetic Data__
@@ -89,6 +91,7 @@ The International Conference on Robotics and Automation (ICRA 2019)
 
 ==手术室虚拟环境：==
 <img src="img/syn_obj.png" width=80%>
+https://www.cadnav.com/3d-models/
 搜集了 19 个手术室设备的模型，作为虚拟环境，简记为 envs。
 
 ==策略：==
@@ -99,12 +102,13 @@ The International Conference on Robotics and Automation (ICRA 2019)
 4. 设置高度会变的天花板，防止网络从天花板高度预测台车高度。
 
 ==输出：==
-<img src="img/syn_out1.png" width=80%>
 
+<img src="img/syn_out1.png" width=45%>
 <img src="img/syn_out2.png" width=45%>
-<img src="img/syn_out3.png" width=45%>
 
-<img src="img/syn_out4.png" width=45%>
+<img src="img/syn_out3.png" width=55%>
+
+b-box 尺寸固定：1350(L)x760(W)x1500(H)
 
 
 
