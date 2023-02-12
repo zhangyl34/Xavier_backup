@@ -47,7 +47,7 @@ __工作原理__
 
 以产品 VLP-16 为例
 
-<img src="/img/vlp_firing.jpg" width=60%>
+<img src="img/vlp_firing.jpg" width=60%>
 
 多线机械式激光雷达在垂直方向发射激光时，不是同时发射。例如这款 16 线激光雷达，在垂直方向每隔 2.304 μs 发射一束激光，垂直方向一次发射循环后等待 18.432 μs，那么该激光雷达在垂直方向的一次发射循环总耗时 (2.304 x 16 + 18.432) μs。
 
@@ -55,11 +55,11 @@ __数据格式__
 
 以产品 VLP-16 为例
 
-<img src="/img/vlp_system.jpg" width=60%>
+<img src="img/vlp_system.jpg" width=60%>
 
 以太网接口。使用 UDP 通讯协议。
 
-<img src="/img/vlp_package.jpg" width=95%>
+<img src="img/vlp_package.jpg" width=95%>
 
 每一帧的数据长度为 1248 字节，其中包含：42 字节的包头、12 组数据包、4 字节时间戳、2 字节雷达型号参数。
 每组数据包分别包含：2 字节数据包的开始标识 (0xFFEE)、2 字节旋转角度、32 x (2 距离值 + 1 反射强度值) 字节的信息。
@@ -205,7 +205,7 @@ $$\cos \theta =\frac{\mathbf{q}_1 \cdot \mathbf{q}_2}{|\mathbf{q}_1||\mathbf{q}_
 
 哈希表是一种根据关键字 __key__ 来访问值 __value__ 的数据结构。哈希表的插入和查找效率非常高，时间复杂度都是 O(1)。
 
-<img src="/img/hash_table.jpeg" width=70%>
+<img src="img/hash_table.jpeg" width=70%>
 
 实际使用中，不同的 __key__ 小概率会计算出相同的 __index__，这就是哈希冲突，几乎所有的哈希函数都存在这个问题。链接中给出了几种常见的解决哈希冲突的方法。
 https://www.cnblogs.com/funtrin/p/16060350.html
@@ -226,7 +226,7 @@ B --> I[CNN] --> J(Suma++ 过滤动态信息)
 
 __设备：__
 
-<img src="/img/loam_hokuyo.jpg" width=60%>
+<img src="img/loam_hokuyo.jpg" width=60%>
 
 <font color=OrangeRed>Hokuyo UTM-30LX：</font>2D 激光雷达；30 m 的最大工作距离；270° 的视场角；25 ms/scan (40 lines/s) 的扫描速度；0.25° 的分辨率。
 固定在电机上实现旋转扫描：-90° ~ 90° 的旋转角度；180°/s 的旋转速度；0.25° 的编码器分辨率。
@@ -256,17 +256,17 @@ __实验：__
 
 由于本文假设在一个 sweep 内，LiDAR 做匀速运动。因此第一个实验 LiDAR 置于移动平台上，由人以 0.5 m/s 的速度匀速推动。
 
-<img src="/img/loam_test1.jpg" width=45%>
+<img src="img/loam_test1.jpg" width=45%>
 
 第二个实验，LiDAR 由人手持。此时匀速运动的假设不成立，作者借助 IMU 来提升效果。<font color=OrangeRed>利用 IMU 的旋转信息和加速度信息，对当前步 sweep 预校畸变。预校畸变后，odometry 算法只需要估计当前步 sweep 内 LiDAR 的平均速度。</font>
 
-<img src="/img/loam_test2.jpg" width=45%>
+<img src="img/loam_test2.jpg" width=45%>
 
 ### FAST-LIO: A Fast, Robust LiDAR-Inertial Odometry Package by Tightly-Coupled Iterated Kalman Filter
 
 __设备：__
 
-<img src="/img/lio_fig1.jpg" width=50%>
+<img src="img/lio_fig1.jpg" width=50%>
 
 <font color=OrangeRed>Livox Avia：</font>面阵激光雷达，特点是测量距离远，视场大，且内置 IMU。DJI L1 也搭载了此雷达。
 视场角：非重复式扫描 70.4° x 77.2°；重复式扫描 70.4° x 4.5°；
@@ -276,7 +276,7 @@ __设备：__
 
 __整体思路：__
 
-<img src="/img/lio_fig2.jpg" width=100%>
+<img src="img/lio_fig2.jpg" width=100%>
 
 基于紧耦合的 <font color=OrangeRed>IEEKF</font>（迭代误差 EKF），融合激光雷达特征点和 IMU 观测值。
 
@@ -301,31 +301,31 @@ __参数定义：__
 __算法流程：__
 
 状态与状态转移定义如下。其中 $\mathbf{\omega}_m, \mathbf{a}_m$ 为 IMU 观测值，$\mathbf{b}_{\omega}, \mathbf{b}_a$ 为 IMU 的观测偏置，$\mathbf{n}_{b\omega}, \mathbf{n}_{ba}$ 为 IMU 观测偏置的高斯噪声，$\mathbf{n}_{\omega}, \mathbf{n}_{a}$ 为 IMU 的观测噪声。
-<img src="/img/lio_eq3.jpg" width=45%>
+<img src="img/lio_eq3.jpg" width=45%>
 
 1. 正向传播，由 Eq. (4) 计算状态 $\hat{\mathbf{x}}_i$，并由 Eq. (5)（泰勒展开）推出预测误差 $\tilde{\mathbf{x}}_i$ 的协方差矩阵 $\hat{\mathbf{P}}_i$;
 
-    <img src="/img/lio_eq4.jpg" width=50%>
-    <img src="/img/lio_eq5.jpg" width=50%>
-    <img src="/img/lio_eq8.jpg" width=50%>
+    <img src="img/lio_eq4.jpg" width=50%>
+    <img src="img/lio_eq5.jpg" width=50%>
+    <img src="img/lio_eq8.jpg" width=50%>
 
 2. 反向传播，计算 $\{L_k\}$ 坐标系下的点云坐标 $^{L_k}\mathbf{p}_{f_j}$，即点云校畸变。
 
 3. IEEKF，已知 $\hat{\mathbf{x}}_k^{\kappa}$，循环迭代计算每一步的系统状态误差 $\tilde{\mathbf{x}}^{\kappa}_{k}$ 的最优估计。
 
     * 由预测值来估计 $\mathbf{H}\tilde{\mathbf{x}}^{\kappa}_{k}$。$(\mathbf{\mu_0},\mathbf{\Sigma_0})=(-\mathbf{H}(\mathbf{J}^{\kappa})^{-1}(\hat{\mathbf{x}}^{\kappa}_k\boxminus\hat{\mathbf{x}}_k),\mathbf{H}\mathbf{P}\mathbf{H}^T)$
-    <img src="/img/lio_eq15.jpg" width=50%>
+    <img src="img/lio_eq15.jpg" width=50%>
 
     * 由观测值来估计 $\mathbf{H}\tilde{\mathbf{x}}^{\kappa}_{k}$。$(\mathbf{\mu_1},\mathbf{\Sigma_1})=(-\mathbf{z}^{\kappa}_k,\mathbf{R})$
-    <img src="/img/lio_eq13.jpg" width=50%>
-    <img src="/img/lio_eq14.jpg" width=50%>
+    <img src="img/lio_eq13.jpg" width=50%>
+    <img src="img/lio_eq14.jpg" width=50%>
 
     * 将两个高斯分布相乘，得到状态误差的最优估计。
-    <img src="/img/lio_eq18.jpg" width=50%>
+    <img src="img/lio_eq18.jpg" width=50%>
 
 __另一种角度看 EEKF：__
 
-<img src="/img/lio_eq17.jpg" width=50%>
+<img src="img/lio_eq17.jpg" width=50%>
 
 <font color=OrangeRed>Eq. (17) 本质上是预测值与观测量两个高斯分布的最大后验估计。对 $\tilde{\mathbf{x}}^{\kappa}_{k}$ 求偏导，令偏导数 = 0。同样可以得到状态误差的最优估计 Eq. (18)。</font>
 
@@ -407,7 +407,7 @@ CustomPoint[] points  # Pointcloud data
 
 __机械式激光雷达：__ Alpha Prime，Puck 系列，HDL 系列。
 
-<img src="/img/vel_alpha.jpg" width=32%>
+<img src="img/vel_alpha.jpg" width=32%>
 
 以产品 Alpha Prime 为例。
 视场角：360° x 40°。
@@ -419,7 +419,7 @@ __机械式激光雷达：__ Alpha Prime，Puck 系列，HDL 系列。
 __固态式激光雷达：__ Velarray 系列，Velabit。水平视角 60°～120°。
 
 <div align = left>
-<img src="/img/vel_velarray.jpg" width=35%>
+<img src="img/vel_velarray.jpg" width=35%>
 </div>
 
 以 Velarray M1600 为例。

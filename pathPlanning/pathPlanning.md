@@ -2,21 +2,23 @@
 
 <!-- code_chunk_output -->
 
-- [Sampling-based path planning](#sampling-based-path-planning)
-  - [PRM](#prm)
-  - [Voronoi](#voronoi)
-  - [RRT](#rrt)
-  - [RRT*](#rrt-1)
-- [Search-based path planning](#search-based-path-planning)
-  - [Dijkstra](#dijkstra)
-  - [A*](#a)
-  - [D*](#d)
-  - [当启发函数更加复杂...](#当启发函数更加复杂)
-- [Kinodynamic path planning](#kinodynamic-path-planning)
-  - [Hybrid A*](#hybrid-a)
-  - [Kinodynamic RRT*](#kinodynamic-rrt)
-  - [Hybrid A* implementation](#hybrid-a-implementation)
-- [Machine Learning path planning](#machine-learning-path-planning)
+- [路径规划](#路径规划)
+  - [Sampling-based path planning](#sampling-based-path-planning)
+    - [PRM](#prm)
+    - [Voronoi](#voronoi)
+    - [RRT](#rrt)
+    - [RRT*](#rrt-1)
+  - [Search-based path planning](#search-based-path-planning)
+    - [Dijkstra](#dijkstra)
+    - [A*](#a)
+    - [D*](#d)
+    - [当启发函数更加复杂...](#当启发函数更加复杂)
+  - [Kinodynamic path planning](#kinodynamic-path-planning)
+    - [Hybrid A*](#hybrid-a)
+    - [Kinodynamic RRT*](#kinodynamic-rrt)
+    - [Hybrid A* implementation](#hybrid-a-implementation)
+  - [Machine Learning path planning](#machine-learning-path-planning)
+- [项目整理](#项目整理)
 
 <!-- /code_chunk_output -->
 
@@ -24,6 +26,8 @@
 1. 静态结构化环境下的路径规划。
 2. 动态已知环境下的路径规划。
 3. 动态不确定环境下的路径规划。
+
+# 路径规划
 
 ## Sampling-based path planning
 
@@ -186,7 +190,40 @@ __Path Planning in Unstructured Environments : A Real-time Hybrid A* Implementat
 
 <img src="img/has_github.png" width=45%>
 
+```c++ {.line-numbers}
+// 粗路径生成伪代码
+while () {
+  从 O 中挑选 (g+h) 最小的节点
+  判断该节点的 Dubins 能否直接命中目标
+  向 dir 方向分别生长 6 个节点 {
+    // 其中 g 是准确值，h=max(Dubins/ReedsShepp, A*)
+    // Dubins/ReedsShepp 不考虑碰撞，A* 不考虑运动学
+    估计新节点的 (g+h)
+    将新节点加入 O 中
+  }
+}
+```
+
 ## Machine Learning path planning
+
+# 项目整理
+
+<img src="img/workstream.jpeg" width=100%>
+
+__1:__
+问题：目前点云 Feature Extraction 使用的是传统方法（用点云所属的 planar or edge 向量来描述点云），特征描述子包含的信息非常少。这使得 State Estimation 非常依赖 IMU Input 的准确性。当运动变化比较剧烈的时候，IMU Input 会不太可靠，IKF-based State Estimation 就可能会失效。
+思考：看到一些研究者用神经网络来建立点云的特征描述子，用不同尺度的几何信息来描述点云。
+
+__2:__
+思考：目前没看到有文章用神经网络来做 State Estimation。感觉可以用 IKF-based 方法的结果，作为神经网络训练目标的真值，从而构建损失函数，进行自监督学习。
+
+__3:__
+问题：目前使用的 SLAM 算法，不包含后端优化（室内小场景，全局优化的必要性不是很高），也许可以增加一个后端优化器。
+思考：看到一些后端优化器的文章，可以直接往 LIO 的算法框架上加。
+
+__4:__
+问题：目前手头有两套 path Smoothing 算法（lexicographic 和 CG-based）。有待深挖
+
 
 
 
