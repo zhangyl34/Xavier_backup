@@ -210,7 +210,7 @@ while () {
 
 # 项目整理
 
-<img src="img/workstream.jpeg" width=100%>
+<img src="img/workstream.png" width=100%>
 
 ## Introduction
 
@@ -234,8 +234,13 @@ while () {
   * Path Planning
   在 Hybrid A* 算法的基础上作出改进：一方面，Hybrid A* 算法的 ==碰撞检测== 特别低效（逐像素判断台车是否与环境相碰），本文将台车用若干个圆代替，通过判断圆不与环境碰撞来保证台车不与环境碰撞；另一方面，为了鼓励台车在目标位姿附近多尝试倒车微调位姿，本文使用了 ==逆向的 Hybrid A* 算法==。
   * Path Optimization
-  牛逼公式放起来
+  用 clothoids 曲线连接节点，同时期望曲率的变化率也是连续的。
+  <img src="img/optimization.jpg" width=70%>
 
+<img src="img/map1.png" width=45%>
+<img src="img/map2.png" width=45%>
+<img src="img/path1.jpg" width=45%>
+<img src="img/path2.jpg" width=45%>
 
 
 
