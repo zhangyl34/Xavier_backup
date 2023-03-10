@@ -19,6 +19,8 @@
     - [Hybrid A* implementation](#hybrid-a-implementation)
   - [Machine Learning path planning](#machine-learning-path-planning)
 - [项目整理](#项目整理)
+  - [Introduction](#introduction)
+  - [Method](#method)
 
 <!-- /code_chunk_output -->
 
@@ -210,19 +212,36 @@ while () {
 
 <img src="img/workstream.jpeg" width=100%>
 
-__1:__
-问题：目前点云 Feature Extraction 使用的是传统方法（用点云所属的 planar or edge 向量来描述点云），特征描述子包含的信息非常少。这使得 State Estimation 非常依赖 IMU Input 的准确性。当运动变化比较剧烈的时候，IMU Input 会不太可靠，IKF-based State Estimation 就可能会失效。
-思考：看到一些研究者用神经网络来建立点云的特征描述子，用不同尺度的几何信息来描述点云。
+## Introduction
 
-__2:__
-思考：目前没看到有文章用神经网络来做 State Estimation。感觉可以用 IKF-based 方法的结果，作为神经网络训练目标的真值，从而构建损失函数，进行自监督学习。
+* ==大多数的无人驾驶导航算法都依靠的是车载雷达。车载雷达只能扫描出小车附近的局部地图信息，而不具备全局视野。因此这些算法在进行全局轨迹规划任务时，往往要求输入已知的环境地图信息。在手术室应用场景下，环境地图往往是复杂多变的，需要在每次轨迹规划前，重新构建。== 本文提出了一套只依赖一台激光雷达设备（低成本）就可以实现“地图构建、台车定位、轨迹规划”的算法。
+* ==Actuator dynamics of the patient-side cart introduce additional constraints, because of slow actuator dynamics.== 因此本文在 Hybrid A* 算法的基础上，优化一条曲率三阶连续的轨迹。
 
-__3:__
-问题：目前使用的 SLAM 算法，不包含后端优化（室内小场景，全局优化的必要性不是很高），也许可以增加一个后端优化器。
-思考：看到一些后端优化器的文章，可以直接往 LIO 的算法框架上加。
+## Method
 
-__4:__
-问题：目前手头有两套 path Smoothing 算法（lexicographic 和 CG-based）。有待深挖
+* __II. System Overview__
+  * Hardware
+  * System Architecture
+* __III. Mapping and Localization__
+  * Mapping Based on FAST-LIO2 Method (*)
+    * State estimation
+    * Mapping
+  * Localization Using VoteNet
+    * Synthetic data generation
+    * Implementation details
+    * Post processing
+* __IV. Desired Trajectory Generation__
+  * Path Planning
+  在 Hybrid A* 算法的基础上作出改进：一方面，Hybrid A* 算法的 ==碰撞检测== 特别低效（逐像素判断台车是否与环境相碰），本文将台车用若干个圆代替，通过判断圆不与环境碰撞来保证台车不与环境碰撞；另一方面，为了鼓励台车在目标位姿附近多尝试倒车微调位姿，本文使用了 ==逆向的 Hybrid A* 算法==。
+  * Path Optimization
+  牛逼公式放起来
+
+
+
+
+
+
+
 
 
 
