@@ -102,3 +102,11 @@ predicted = torch.tensor([[2.0,1.0,0.1]])
 nn.CrossEntropyLoss(predicted, actual)
 ```
 
+## 常见函数
+
+```python {.line-numbers}
+# tells your model that you are training the model. This helps inform layers such as Dropout and BatchNorm, which are designed to behave differently during training and evaluation.
+model.train()
+model.eval()
+```
+
