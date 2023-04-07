@@ -1,0 +1,25 @@
+ipv4:
+- address: 218.193.189.226
+- netmask: 255.255.255.0
+- gateway: 218.193.189.254
+- DNS: 202.120.2.101
+
+livox:
+- address: 192.168.1.50
+- netmask: 255.255.255.0
+
+强制关闭程序：
+xkill
+
+arxiv 无法访问：
+将 https://arxiv.org/abs/2004.03048
+改为 https://xxx.itp.ac.cn/abs/2004.03048
+
+pcl：
+用的 pcl 库为 1.13 版本。
+但是用的 pcl_ros 库是 1.10 版本。/usr/include/pcl-1.10 是从 /opt/ros/noetic/share 里拷出来的。
+include directory: /usr/local/include/pcl-1.13
+library directory: /usr/local/lib
+pcl 有可能在链接阶段报错：undefined reference to 'pcl::PCLBase<>::...'。这是没有 include 该函数的定义文件。find . -name '*' | xargs grep -r 'pcl::PCLBase<>::...' 查找对应文件并 include 之。
+
+
