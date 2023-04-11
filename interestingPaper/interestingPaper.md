@@ -2,12 +2,14 @@
 
 <!-- code_chunk_output -->
 
-- [物体追踪](#物体追踪)
+- [3D Reconstruction](#3d-reconstruction)
   - [BundleSDF: Neural 6-DoF Tracking and 3D Reconstruction of Unknown Objects](#bundlesdf-neural-6-dof-tracking-and-3d-reconstruction-of-unknown-objects)
+  - [Neural Geometric Level of Detail: Real-time Rendering with Implicit 3D Shapes](#neural-geometric-level-of-detail-real-time-rendering-with-implicit-3d-shapes)
+  - [Multiview Neural Surface Reconstruction by Disentangling Geometry and Appearance](#multiview-neural-surface-reconstruction-by-disentangling-geometry-and-appearance)
 
 <!-- /code_chunk_output -->
 
-## 物体追踪
+## 3D Reconstruction
 
 --- 
 
@@ -49,5 +51,42 @@ __用记忆池中的关键帧学习 neural object field。__
 * object field 用两个映射来表示：geometry function + appearance function。
 * 这两个映射分别用两个神经网络在线学习。
 
+---
+
+### Neural Geometric Level of Detail: Real-time Rendering with Implicit 3D Shapes
+
+__NVIDIA | CVPR 2021__
+
+<img src="img/nglod_3.png">
+
+<font color="OrangeRed">Abstrac</font>
+
+__给定从不同角度观测某模型的点云数据，本文用神经网络训练了该模型的 Signed Distance Functions (SDFs)。__
+本文的核心思想在于：简化网络模型 $f_\theta$，将计算复杂度转移到 shape feature vector (z) 问询上。sparse voxel octree (SVO) 的每个体素角点都训练了一个 z。SVO 越深，z 包含的细节信息越丰富。不同深度对应的网络参数 $\theta$ 不同。
+
+<font color="OrangeRed">3.2. Neural Geometric Levels of Detail</font>
+
+输入一个 3D 点和 SVO 深度 L；每层体素都三线性插值获取该点的特征 z；将不同深度的 z 相加，输入参数为 $\theta_L$ 的网络；得到 $d_L$。
+
+<font color="OrangeRed">3.4. Interactive Rendering</font>
+
+给定一条射线 r 和 SVO 深度 L；先在 SVO 上搜索所有与 r 相交的体素，记为集合 V；在 V 中迭代使用 sphere tracing，寻找 r 与模型的交点。
+
+---
+
+### Multiview Neural Surface Reconstruction by Disentangling Geometry and Appearance
+
+__NeurIPS 2020__
+
+<img src="img/multiviewNSR_1.png">
+
+<font color="OrangeRed">Abstrac</font>
+
+输入物体在不同相机视角（已知 pose）下的 RGB 图象，训练 3D geometry 和 image renderer。
+
+<font color="OrangeRed">3.4 Loss</font>
+
+__利用 SDF 估计网络对每个像素作 sphere tracing，寻找像素与模型的 3D 交点，计算 mask loss；将交点信息输入 renderer 后，计算 RGB loss；为了避免 SDF 处处为零，在空间中均匀采样，计算 IGR loss。__
+所谓 IGR loss，出自文章 Implicit Geometric Regularization for Learning Shapes (ICML 2020)。这篇文章输入一组 3D 点云，学习模型的 SDF。
 
 
