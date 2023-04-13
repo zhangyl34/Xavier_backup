@@ -22,4 +22,5 @@ include directory: /usr/local/include/pcl-1.13
 library directory: /usr/local/lib
 pcl 有可能在链接阶段报错：undefined reference to 'pcl::PCLBase<>::...'。这是没有 include 该函数的定义文件。find . -name '*' | xargs grep -r 'pcl::PCLBase<>::...' 查找对应文件并 include 之。
 
-
+查看 GPU 占用：
+sudo jtop
