@@ -111,8 +111,5 @@ __输入一片点云，估计 occupancy field O。__
 
 <font color="OrangeRed">3.3 Sign-Agnostic Implicit Surface Optimization</font>
 
-__为了更好地理解环境中的新形状。__
-
-
-
+__为了更好地理解环境中的新形状，根据实际点云对网络参数进行微调。__
 

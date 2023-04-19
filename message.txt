@@ -24,3 +24,6 @@ pcl 有可能在链接阶段报错：undefined reference to 'pcl::PCLBase<>::...
 
 查看 GPU 占用：
 sudo jtop
+
+录屏开始与结束：
+ctrl+shift+alt+R
