@@ -4,7 +4,8 @@
 
 - [autograd](#autograd)
 - [training pipeline](#training-pipeline)
-- [softmax and corss-entropy](#softmax-and-corss-entropy)
+- [softmax & corss-entropy & binary_cross_entropy_with_logits](#softmax-corss-entropy-binary_cross_entropy_with_logits)
+- [常见函数](#常见函数)
 
 <!-- /code_chunk_output -->
 
@@ -74,12 +75,13 @@ for epoch in Range(200):
         optimizer.zero_grad()
 ```
 
-## softmax and corss-entropy
+## softmax & corss-entropy & binary_cross_entropy_with_logits
 
 ```python {.line-numbers}
 import numpy as np
 import torch
 import torch.nn as nn
+from torch.nn import functional as F
 
 # softmax: [2.0,1.0,0.1]->[0.7,0.2,0.1]
 # 自己写的版本
@@ -100,6 +102,14 @@ actual = torch.tensor([0])  # 对应 [1,0,0]
 # nn.CrossEntropyLoss() 会先做一个 softmax
 predicted = torch.tensor([[2.0,1.0,0.1]])
 nn.CrossEntropyLoss(predicted, actual)
+
+# binary_cross_entropy_with_logits: [5,1,3], [1,0,1] -> [0.0067, 1.3133, 0.0486]
+# 自己写的版本
+def binary_cross_entropy_with_logits(logit, label):
+    sigma = 1 / (1+np.exp(-logit))  # [-inf,+inf] -> [0,1]
+    loss = -label*np.log(sigma)-(1-label)*np.log(1-np.exp(-logit))
+# torch 版本
+F.binary_cross_entropy_with_logits(logit,label,reduction='none')
 ```
 
 ## 常见函数

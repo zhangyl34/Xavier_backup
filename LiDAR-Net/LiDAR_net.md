@@ -17,6 +17,8 @@
   - [落地期（2021～）](#落地期2021~)
     - [Voxel R-CNN](#voxel-r-cnn)
     - [CIA-SSD](#cia-ssd)
+  - [2023](#2023)
+    - [VoxelNeXt: Fully Sparse VoxelNet for 3D Object Detection and Tracking](#voxelnext-fully-sparse-voxelnet-for-3d-object-detection-and-tracking)
   - [参考文献](#参考文献)
 - [物体语义分割与实例分割](#物体语义分割与实例分割)
     - [RandLA-Net](#randla-net)
@@ -400,6 +402,33 @@ __Distance-Variant IoU-Weighted NMS__
 1~2: 用 centerness 进一步更新置信度。
 5~7: 取置信度最高的 b-box：c'；筛选 c' 的支持集：L'；统计 c' 的票数。<font color=OrangeRed>这一步可以过滤掉 false-positive candidate。</font>
 8: 拟合 c' 投票集的高斯分布，fine tune b-box。
+
+## 2023
+
+### VoxelNeXt: Fully Sparse VoxelNet for 3D Object Detection and Tracking
+
+__CVPR 2023__
+
+<img src="img/voxelnext_2.png" width=100%>
+
+大部分 3D 检测网络都会包含：Sparse-to-Dense Convertion, Anchors/Centers, NMS, RPN, Dense head, ROI Pooling 这些非常耗时的计算环节。本文以简洁的网络结构兼顾了计算效率与精度。
+
+<font color=OrangeRed>个人感觉本文的核心思想类似 VoteNet。区别在于 VoteNet 综合考虑了多个边界点的投票信息；而本文直接相信了特征最丰富的体素的预测结果。</font>
+
+__Fully Sparse:__
+1. 空间中的大部分体素都不含点云，或者特征不明显，因此不应该在这些体素上浪费计算资源。
+2. 大部分 3D 检测网络一般通过扩大感受野来计算物体中心的特征向量，但是物体中心一般不含点云，因此更加高效的方法是通过物体边界上的点云直接预测 b-box。
+
+__Detailed designs:__
+
+1. Two additional down-sampling
+实验表明，更大的感受野有助于提升精度；降采样比增大 kernel size 效率更高。
+2. Sparse Height Compression
+省略 z 轴特征，节省计算量。
+3. Spatially Voxel Pruning
+删除特征不明显的 voxel，节省计算量。
+4. Sparse Max Pooling
+用 Sparse Max-pool 代替 NMS，节省计算量。
 
 ## 参考文献
 

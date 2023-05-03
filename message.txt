@@ -27,3 +27,8 @@ sudo jtop
 
 录屏开始与结束：
 ctrl+shift+alt+R
+
+VTK 8.2：
+卸载老版本：https://dlonng.com/posts/pcl-vtk
+编译新版本：https://medium.com/@lyl1617670866/how-to-install-vtk-9-1-on-ubuntu-18-04-a4530ce790da
+undefined reference to `png_init_filter_functions_neon'：https://blog.csdn.net/qq_19647107/article/details/118710026
