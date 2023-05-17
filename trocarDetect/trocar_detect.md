@@ -80,3 +80,23 @@ __精度：__
 __速度：__
 
 在笔记本上的处理速度约 2-3s/帧。
+
+---
+
+### RAY-POS: a LIDAR-based assistance system for intraoperative repositioning of mobile C-arms without external aids
+
+__International Journal of Computer Assisted Radiology and Surgery 2022 (3.421)__
+__慕尼黑工业大学 Research Group MITI__
+
+C-arm 在手术中有时需要反复推到同一位姿，对病人进行扫描。
+于是本文利用 2D 激光雷达 SLAM 技术，在 C-arm 第一次到达目标位姿进行扫描时，记录下该目标位姿；当手术过程中需要再次使用 C-arm 对病人进行同一部为的扫描时，便可以利用激光雷达的当前位姿和之前记录的目标为姿，自动导航 C-arm 设备。平均到位精度有 11.77mm。
+
+<img src="img/raypos_4.png" width=50%>
+
+GUI 设计的比较有意思，当 C-arm 接近目标位姿（10cm 以内）时，C-arm 首先会停下，并允许操作员在 GUI 内微调目标位姿。（这步操作也许能补偿 trocar 位姿检测不准的问题？）
+
+<img src="img/raypos_1.png" width=80%>
+
+两个实验：
+1. localization test：将 SLAM 算法的位姿估计与 NDI marker 的位姿（GT）做比较。
+2. repositioning test：C-arm 的到位精度。
