@@ -22,6 +22,7 @@
   - [编译并在 VS Code 中调试](#编译并在-vs-code-中调试)
   - [消息回调](#消息回调)
   - [rosbag](#rosbag)
+  - [Qt](#qt)
 
 <!-- /code_chunk_output -->
 
@@ -560,4 +561,43 @@ $ rostopic echo /livox/lidar | tee topic_lidar.yaml
 ```
 
 也可以使用 ros_readbagfile 脚本。
+
+## Qt
+
+__create a ROS Qt Package:__
+
+```shell
+$ catkin_create_qt_create qtros
+```
+
+得到如下结构：
+
+```txt
+qtros
+|____CMakeLists.txt
+|____include
+|    |____qtros
+|         |____main_window.hpp
+|         |____qnode.hpp
+|
+|____mainpage.dox
+|____pacakge.xml
+|____resources
+|    |____images.qrc
+|    |____images
+|         |____icon.png
+|
+|____src
+|    |____main.cpp
+|    |____main_window.cpp
+|    |____qnode.cpp
+|
+|____ui
+     |____main_window.ui
+```
+
+__build in Qt:__
+
+在 Qt 的 Build Settings 界面的 CMake 栏，加一条键值：CMAKE_PREFIX_PATH /opt/ros/noetic。
+
 
