@@ -21,7 +21,6 @@
   - [消息格式](#消息格式)
 - [一些公司](#一些公司)
   - [Velodyne](#velodyne)
-- [方案](#方案)
 
 <!-- /code_chunk_output -->
 
@@ -100,12 +99,12 @@ $$\hat{\theta}=\max_{\theta} \pi(\theta|\mathbf{x})=\max_{\theta} f(\mathbf{x}|\
 误差满足高斯分布的线性系统状态方程如下，其中过程噪声 $\mathbf{w}$ 和测量噪声 $\mathbf{v}$ 的协方差矩阵分别是 $\mathbf{Q}$ 和 $\mathbf{R}$：
 $$\begin{cases}
 \mathbf{x}_k = \mathbf{F}_{k-1} \mathbf{x}_{x-1} + \mathbf{G}_{k-1} \mathbf{u}_{k-1} + \mathbf{w}_{k-1} \\
-\mathbf{y}_{k} = \mathbf{H}_{k} \mathbf{x}_{j} + \mathbf{v}_{k}
+\mathbf{y}_{k} = \mathbf{H}_{k} \mathbf{x}_{k} + \mathbf{v}_{k}
 \end{cases}$$
 
 1. 预测状态向量 $\hat{\mathbf{x}}_{k|k-1}$ 与状态误差协方差矩阵 $\mathbf{P}_{k|k-1}$。
 $$\begin{cases}
-\hat{\mathbf{x}}_{k|k-1} = \mathbf{F}_{k-1} \hat{\mathbf{x}}_{x-1} + \mathbf{G}_{k-1} \mathbf{u}_{k-1} \\
+\hat{\mathbf{x}}_{k|k-1} = \mathbf{F}_{k-1} \hat{\mathbf{x}}_{k-1} + \mathbf{G}_{k-1} \mathbf{u}_{k-1} \\
 \mathbf{P}_{k|k-1} = \mathbf{F}_{k-1} \mathbf{P}_{k-1} \mathbf{F}_{k-1}^T + \mathbf{Q}_{k-1}
 \end{cases}$$
 
@@ -185,7 +184,7 @@ $$\mathbf{q}^{-1} = \frac{\mathbf{q}^*}{|\mathbf{q}|^2}$$
 e.g. $\mathbf{p}=[0,2\mathbf{i}]$ 绕 $\hat{\mathbf{v}}=[\frac{\sqrt{2}}{2}\mathbf{i}+\frac{\sqrt{2}}{2}\mathbf{k}]$ 转 $\theta=\frac{\pi}{2}$。$\mathbf{q}=[\cos \frac{\pi}{4},\sin \frac{\pi}{4} (\frac{\sqrt{2}}{2}\mathbf{i}+\frac{\sqrt{2}}{2}\mathbf{k})]$，$\mathbf{q}\mathbf{p}\mathbf{q}^{-1}=[0,\mathbf{i}+\sqrt{2} \mathbf{j}+\mathbf{k}]$。
 
 <font color=OrangeRed>SLERP</font>
-在两个旋转向量 $\mathbf{q}_1, \mathbf{q_2}$ 之间做球面线性插值。
+在两个旋转向量 $\mathbf{q}_1, \mathbf{q}_2$ 之间做球面线性插值。
 $$\mathbf{q}_t = \mathbf{q}_1 (\mathbf{q}_1^{-1} \mathbf{q}_2)^t$$
 
 where:
@@ -428,35 +427,6 @@ __固态式激光雷达：__ Velarray 系列，Velabit。水平视角 60°～120
 
 （刚刚推出，性能尚未稳定，市场上一般批量售卖，性价比不高）
 
-## 方案
-
-```mermaid
-graph LR
-G[方案] -->A[激光雷达置于台车上] --> C(方案三)
-G --> B[激光雷达置于环境中] --> D[固定式] --> F(方案一)
-B --> E[手持式] --> H(方案二)
-```
-
-__方案一__
-
-1. 每次扫描都保证激光雷达静止，静止可以保证点云不含畸变。<font color=OrangeRed>这一步使得我们不需要对点云校畸变，也就不需要做激光雷达的运动估计，使算法大大简化。</font>
-2. 可以在多个位置实施静态扫描，获取多组点云，做点云精配准，建立手术室 map。
-3. 获得 map 后，将台车模型与 map 配准。即获取台车在 map 中的位姿。
-4. 进而可以实现路径规划与避障。
-
-方案一需要使用三维激光雷达。为了节约成本，也可以用二维激光雷达搭配电机的方案，如论文 LOAM。此时需要对点云数据校畸变，但是可以利用电机编码器信息直接校畸变。
-
-__方案二__
-
-LiDAR 搭配 IMU 使用的方案。LiDAR 由护士手持，具备六个自由度，边走边扫描。可以只利用 IMU 信息做点云校畸变；也可以按照论文 FAST-LIO 的思路，紧耦合激光雷达特征点和 IMU 观测值。
-
-__方案三__
-
-专利组期望的技术路线是：激光雷达搭载在台车上，实时扫描。沿着预生成轨迹走，遇到障碍物再对轨迹做调整。
-
-<font color=OrangeRed>问题：</font>
-1. 算法上来说，路径的不确定性很大。
-2. 激光雷达的有效视场可能比较小，激光雷达下半部分扫描区域大概率会被定位臂遮挡。
 
 
 

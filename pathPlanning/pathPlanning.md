@@ -149,7 +149,7 @@ __Hybrid-State A* Search__
 
 fig2：节点之间的连线不再是线段，而是曲线，这更加符合小车运动学规律。
 
-fig3：两种启发函数：non-holonomic-without-obstacles (b,c) 和 holonomic-with-obstacles (d)。前者保证了自动泊车的朝向；后者考虑了环境中的障碍物。
+fig3：两种启发函数：non-holonomic-without-obstacles (b,c) 和 holonomic-with-obstacles (d)。前者保证了自动泊车的朝向；后者考虑了环境中的障碍物。前者用 RS 曲线，后者用 2D A* 搜索，取 max。
 
 另外一个小技巧是利用 RS 曲线进行简化计算。大致思路是在拓展一些节点时，通过计算当前节点的 RS 曲线来生成一条最优路径。然后检查该路径是否与障碍物相碰，如果没有碰撞，就执行该路径。
 

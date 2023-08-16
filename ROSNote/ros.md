@@ -598,6 +598,6 @@ qtros
 
 __build in Qt:__
 
-在 Qt 的 Build Settings 界面的 CMake 栏，加一条键值：CMAKE_PREFIX_PATH /opt/ros/noetic。
+在 Qt 的 Build Settings 界面的 CMake 栏，加一条键值: CMAKE_PREFIX_PATH /opt/ros/noetic。
 
 

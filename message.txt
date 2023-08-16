@@ -15,6 +15,12 @@ arxiv 无法访问：
 将 https://arxiv.org/abs/2004.03048
 改为 https://xxx.itp.ac.cn/abs/2004.03048
 
+查看 GPU 占用：
+sudo jtop
+
+录屏开始与结束：
+ctrl+shift+alt+R
+
 pcl：
 用的 pcl 库为 1.13 版本。
 但是用的 pcl_ros 库是 1.10 版本。/usr/include/pcl-1.10 是从 /opt/ros/noetic/share 里拷出来的。
@@ -22,13 +28,14 @@ include directory: /usr/local/include/pcl-1.13
 library directory: /usr/local/lib
 pcl 有可能在链接阶段报错：undefined reference to 'pcl::PCLBase<>::...'。这是没有 include 该函数的定义文件。find . -name '*' | xargs grep -r 'pcl::PCLBase<>::...' 查找对应文件并 include 之。
 
-查看 GPU 占用：
-sudo jtop
-
-录屏开始与结束：
-ctrl+shift+alt+R
-
-VTK 8.2：
+VTK 8.2（用于 C++ 聚类算法的显示）：
 卸载老版本：https://dlonng.com/posts/pcl-vtk
 编译新版本：https://medium.com/@lyl1617670866/how-to-install-vtk-9-1-on-ubuntu-18-04-a4530ce790da
 undefined reference to `png_init_filter_functions_neon'：https://blog.csdn.net/qq_19647107/article/details/118710026
+
+但是 pcl_ros 依赖 VTK 7.1：
+当不需要 7.1 的时候：
+sudo mv /usr/include/vtk-7.1 ~/include-vtk-7.1-bak
+sudo mv /usr/lib/cmake/vtk-7.1 ~/cmake-vtk-7.1-bak
+sudo mv /usr/bin/vtk* ~/bin-vtk-7.1-bak
+需要 7.1 的时候再恢复回来。
